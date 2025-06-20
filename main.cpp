@@ -65,10 +65,10 @@ public:
             this->tail = itemNode;      // Set tail to the new item
         }
         else {
-            itemNode->bef = nullptr;    // Set the new item's previous pointer to nullptr
-            itemNode->aft = this->head; // Link the new item to the current head
-            itemNode->aft->bef = itemNode; // Set the current head's previous pointer to the new item
-            this->head = itemNode;      // Update the head to the new item
+            itemNode->bef = nullptr;        // Set the new item's previous pointer to nullptr
+            itemNode->aft = this->head;     // Link the new item to the current head
+            itemNode->aft->bef = itemNode;  // Set the current head's previous pointer to the new item
+            this->head = itemNode;          // Update the head to the new item
         }
     }
 
@@ -100,20 +100,31 @@ public:
             ItemNode* current = this->head; // Start from the head
             bool found = false;             // Flag to check if position is found
             int count = 1;                  // Initialize count to track the position
+
+            // Traverse to the nth-1 node or end of list (Look behind current position)
             while (current != nullptr) {    // Loop through the list
-                if (count == n) {           // If we reach the nth position
+                if (count+1 == n) {         // If we reach the nth-1 position
                     found = true;           // Set found to true
                     break;                  // Exit the loop
                 }
-                current = current->aft;     // Move to the next item
+                current = current->aft;     // Move to the next item (since first position is 1)
                 count++;                    // Increment the count
             }
 
-            if (found) {                        // If the nth position is found
-                current->bef->aft = itemNode;   // Update the aft pointer of the node infront
-                itemNode->bef = current->bef;   // Update the bef pointer of the new node
-                itemNode->aft = current;        // Update the aft pointer of the new node
-                current->bef = itemNode;        // Update the bef pointer of the current node
+            if (found) {                        // If the nth-1 position is found
+                if (current->aft == nullptr) {  // If we are inserting at the end (n position is the last)
+                    current->aft = itemNode;    // Link the current node to the new item
+                    itemNode->bef = current;    // Set the new item's previous pointer to the current node
+                    itemNode->aft = nullptr;    // Set the new item's aft pointer to nullptr
+                    this->tail = itemNode;      // Update the tail to the new item
+                }
+                else {
+                    current = current->aft;         // Move to the next item (the nth position)
+                    current->bef->aft = itemNode;   // Update the aft pointer of the node infront
+                    itemNode->bef = current->bef;   // Update the bef pointer of the new node
+                    itemNode->aft = current;        // Update the aft pointer of the new node
+                    current->bef = itemNode;        // Update the bef pointer of the current node
+                }
             }
             else {  // If the nth position is not found
                 cout << "Position " << n << " is out of bounds, unable to insert.\n";
@@ -123,12 +134,59 @@ public:
 
     // Task 5: Delete the item node at the middle of the list
     void task5(int n) {
+        if (n < 2) {    // If n is less than 2, do nothing, as we cannot delete in the middle
+            cout << "Invalid position, n must be greater than or equal to 2.\n";
+        }
+        else if (this->head == nullptr) {   // If the list is empty
+            cout << "List is empty, unable to delete in the middle.\n";
+        }
+        else {
+            ItemNode* current = this->head; // Start from the head
+            bool found = false;             // Flag to check if position is found
+            int count = 1;                  // Initialize count to track the position
+            while (current != nullptr) {    // Loop through the list
+                if (count+1 == n) {         // If we reach the nth-1 position
+                    found = true;           // Set found to true
+                    break;                  // Exit the loop
+                }
+                current = current->aft;     // Move to the next item
+                count++;                    // Increment the count
+            }
 
+            if (found) {                            // If the nth-1 position is found
+                if (current->aft == nullptr) {      // If nth item is null (last item)
+                    cout << "Position" << n << "is null, unable to delete\n";
+                }
+                else {
+                    current = current->aft;             // Move to the nth item
+                    if (current->aft == nullptr) {      // If the nth item is the last item
+                        current->bef->aft = nullptr;    // Set the aft pointer of the previous node to nullptr
+                        this->tail = current->bef;      // Update the tail to the previous node
+                    }
+                    else {
+                        current->bef->aft = current->aft;   // Update the aft pointer of the node infront
+                        current->aft->bef = current->bef;   // Update the bef pointer of the node after
+                    }
+                    delete current;                     // Delete the nth item
+                }
+            }
+            else {  // If the nth position is not found
+                cout << "Position " << n << " is out of bounds, unable to delete.\n";
+            }
+        }
     }
 
     // Task 6: Delete the last node in the list
     void task6() {
-
+        if (this->tail == nullptr) {    // If the list is empty
+            cout << "List is empty, nothing to delete.\n";
+        }
+        else {
+            ItemNode* toDelete = this->tail;    // Store the tail node to delete
+            this->tail->bef->aft = nullptr;     // Set the aft pointer of the second last node to nullptr
+            this->tail = this->tail->bef;       // Update the tail to the second last node
+            delete toDelete;                    // Delete the old tail node
+        }
     }
 };
 
